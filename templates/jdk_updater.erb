@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if /usr/bin/less /usr/java/jdk1.8/release | grep -q 1.8.0_77
+        then echo "Latest version Installed"
+exit
+fi
+
+/usr/bin/yum clean all
+
+if /usr/bin/yum list "jdk" "jdk1.8*" | grep -q Available
+        then /usr/bin/yum -y install "jdk" "jdk1.8*"
+        sleep 5
+        for JDK_DIR in $(find /usr/java/ -maxdepth 1 -name 'jdk*' -type d -print | sort -r)
+do
+        JDK_VERSION=$(basename ${JDK_DIR})
+        JDK_MAJOR_VERSION=$(echo ${JDK_VERSION} | awk -F. '{ printf "%s.%s\n", $1, $2; }')
+        (
+                cd $(dirname ${JDK_DIR})
+                LATEST_SERIES_JDK=$(ls | grep ${JDK_MAJOR_VERSION} | sort -r | head -n +1)
+                ([[ -s ${JDK_MAJOR_VERSION} ]] && [[ "$(readlink ${JDK_MAJOR_VERSION})" == "${LATEST_SERIES_JDK}" ]]) || \
+                (rm -fv ${JDK_MAJOR_VERSION} && ln -sv ${LATEST_SERIES_JDK} ${JDK_MAJOR_VERSION})
+        )
+done
+else echo "$HOSTNAME does have jdk installed" | mailx -s "jdk check" zachary.kight@umuc.edu
+fi
+
+exit

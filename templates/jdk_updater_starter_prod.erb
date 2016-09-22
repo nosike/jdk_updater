@@ -1,0 +1,10 @@
+#!/bin/bash
+DATE=`date "+%d"`
+
+if [ $DATE -ge 15 -a $DATE -le 21 ];
+   then
+     /usr/local/patching/jdk_updater.sh
+   else
+      exit 0
+   fi
+exit
